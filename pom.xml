@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.cmt</groupId>
-    <artifactId>dubbo-remote-spi</artifactId>
+    <groupId>io.github.cmt.dubbo-remote-spi</groupId>
+    <artifactId>parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>extension-consumer</module>
-        <module>extension-provider</module>
-        <module>extension-common</module>
-        <module>extension_demo</module>
+        <module>dubbo-remote-spi-common</module>
+        <module>dubbo-remote-spi-provider</module>
+        <module>dubbo-remote-spi-consumer</module>
+        <module>dubbo_remote_spi_demo</module>
     </modules>
 
     <properties>
@@ -40,8 +40,8 @@
             </dependency>
 
             <dependency>
-                <groupId>io.github.cmt</groupId>
-                <artifactId>extension-common</artifactId>
+                <groupId>io.github.cmt.dubbo-remote-spi</groupId>
+                <artifactId>common</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
