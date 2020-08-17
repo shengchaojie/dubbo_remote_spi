@@ -31,13 +31,18 @@
 
 ```
 <dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo</artifactId>
+    <groupId>io.github.cmt.dubbo-remote-spi</groupId>
+    <artifactId>consumer</artifactId>
+    <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
 
 针对业务端，实现扩展点接口，使用provider依赖
 
 ```
-
+<dependency>
+    <groupId>io.github.cmt.dubbo-remote-spi</groupId>
+    <artifactId>provider</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
 ```
