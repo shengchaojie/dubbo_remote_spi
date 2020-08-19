@@ -10,7 +10,7 @@
 
     <dubbo:registry address="zookeeper://127.0.0.1:2181" />
 
-    <context:component-scan base-package="io.github.cmt.api.consumer" />
+    <context:component-scan base-package="io.github.shengchaojie.drs.test.consumer" />
 
-    <context:component-scan base-package="io.github.cmt.api.provider" />
+    <context:component-scan base-package="io.github.shengchaojie.drs.test.provider" />
 </beans>
