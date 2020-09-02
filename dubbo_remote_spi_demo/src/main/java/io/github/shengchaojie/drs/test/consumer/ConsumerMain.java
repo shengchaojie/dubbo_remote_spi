@@ -17,7 +17,7 @@ public class ConsumerMain {
         HelloService helloService = applicationContext.getBean("io.github.shengchaojie.drs.test.api.HelloService",HelloService.class);
         BusinessContext.setBizCode("chinese");
         System.out.println(helloService.hello());
-        BusinessContext.setBizCode("american");
+        BusinessContext.setBizCode("american2");
         System.out.println(helloService.hello());
 
         ExtensionHelper.execute("chinese",()-> {

@@ -145,6 +145,7 @@ public class DubboConfigUtils {
         protocolConfig.setPort(NetUtils.getAvailablePort());
         return protocolConfig;
     }
+
     private static ApplicationContext getApplicationContext() {
         ApplicationContext applicationContext = ApplicationContextHolder.getApplicationContext();
 

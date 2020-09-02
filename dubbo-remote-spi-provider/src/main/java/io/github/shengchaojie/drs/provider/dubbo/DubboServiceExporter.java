@@ -4,6 +4,7 @@ import io.github.shengchaojie.drs.common.DubboConfigUtils;
 import io.github.shengchaojie.drs.common.ExtensionRegistry;
 import io.github.shengchaojie.drs.common.Mode;
 import io.github.shengchaojie.drs.common.SpiException;
+import io.github.shengchaojie.drs.common.annotation.DefaultExtension;
 import io.github.shengchaojie.drs.common.annotation.SPI;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.util.ClassUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -31,14 +33,7 @@ public class DubboServiceExporter {
         return clazz.isAnnotationPresent(SPI.class);
     }
 
-    public void export(Object bean, String bizCode) {
-        Class<?> clazz= AopUtils.getTargetClass(bean);
-        //获取Extension标注的实现类继承的spi接口
-        List<Class<?>> spiInterfaces = Arrays.stream(ClassUtils.getAllInterfacesForClass(clazz)).filter(this::isSPIInterface).collect(Collectors.toList());
-        if(spiInterfaces.size()==0){
-            throw SpiException.fail(AopUtils.getTargetClass(bean).getName()+"使用了@Extension标注,但未继承SPI接口!");
-        }
-
+    public void export(Object bean, String bizCode, List<Class<?>> spiInterfaces) {
         for (Class<?> spiInterface: spiInterfaces){
             if(isGroupExport(spiInterface)){
                 groupExport(bean,bizCode,spiInterface);
@@ -65,6 +60,12 @@ public class DubboServiceExporter {
         serviceConfig.export();
 
         ExtensionRegistry.getINSTANCE().registry(spiInterfaces,bizCode,bean);
+
+        DefaultExtension defaultExtension = AopUtils.getTargetClass(bean).getAnnotation(DefaultExtension.class);
+        if(Objects.nonNull(defaultExtension)){
+            ExtensionRegistry.getINSTANCE().registryDefault(spiInterfaces.getName(),bean);
+        }
+
     }
 
     private void tagExport(Object bean, String bizCode, Class<?> spiInterfaces) {
@@ -79,5 +80,10 @@ public class DubboServiceExporter {
         serviceConfig.export();
 
         ExtensionRegistry.getINSTANCE().registry(spiInterfaces,bizCode,bean);
+
+        DefaultExtension defaultExtension = AopUtils.getTargetClass(bean).getAnnotation(DefaultExtension.class);
+        if(Objects.nonNull(defaultExtension)){
+            ExtensionRegistry.getINSTANCE().registryDefault(spiInterfaces.getName(),bean);
+        }
     }
 }

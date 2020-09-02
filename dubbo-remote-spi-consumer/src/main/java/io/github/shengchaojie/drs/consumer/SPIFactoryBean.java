@@ -10,6 +10,7 @@ import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.utils.ReferenceConfigCache;
 import org.apache.dubbo.rpc.Constants;
 import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.RpcException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
@@ -92,7 +93,19 @@ public  class SPIFactoryBean<T> implements FactoryBean<T> {
                 RpcContext.getContext().setAttachment(Constants.FORCE_USE_TAG,"true");
             }
 
-            return method.invoke(obj,args);
+            try {
+                return method.invoke(obj, args);
+            }catch (RpcException rpcException){
+                if(!rpcException.isNoInvokerAvailableAfterFilter()){
+                    throw rpcException;
+                }
+
+                obj = ExtensionRegistry.getINSTANCE().getDefault(spiInterface);
+                if(obj == null){
+                    throw rpcException;
+                }
+                return method.invoke(obj, args);
+            }
         }
     }
 
