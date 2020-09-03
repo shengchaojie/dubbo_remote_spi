@@ -20,7 +20,7 @@ public class SPIFactoryBeanRegistrar implements ImportBeanDefinitionRegistrar {
         for(Class<?> clazz : annoAttrs.getClassArray("value")){
             BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SPIFactoryBean.class);
             beanDefinitionBuilder.addConstructorArgValue(clazz);
-            registry.registerBeanDefinition(clazz.getName(),beanDefinitionBuilder.getBeanDefinition());
+            registry.registerBeanDefinition("SPI."+clazz.getSimpleName(),beanDefinitionBuilder.getBeanDefinition());
         }
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
@@ -24,7 +25,7 @@ import java.util.Objects;
  * @author shengchaojie
  * @date 2020/8/14
  **/
-public  class SPIFactoryBean<T> implements FactoryBean<T> {
+public class SPIFactoryBean<T> implements FactoryBean<T> {
 
     private Class<T> spiInterface;
 
@@ -34,11 +35,11 @@ public  class SPIFactoryBean<T> implements FactoryBean<T> {
 
     @Override
     public T getObject() throws Exception {
-        SPI spi = AnnotationUtils.getAnnotation(spiInterface,SPI.class);
-        if(Objects.isNull(spi)){
+        SPI spi = AnnotationUtils.getAnnotation(spiInterface, SPI.class);
+        if (Objects.isNull(spi)) {
             throw new SpiException("接口未配置SPI注解");
         }
-        return (T)Proxy.newProxyInstance(this.getClass().getClassLoader(),new Class[]{spiInterface},new ExtensionInvocationHandler(spiInterface,spi.mode()));
+        return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{spiInterface}, new ExtensionInvocationHandler(spiInterface, spi.mode()));
     }
 
     @Override
@@ -51,7 +52,7 @@ public  class SPIFactoryBean<T> implements FactoryBean<T> {
         return true;
     }
 
-    private static class ExtensionInvocationHandler<T> implements InvocationHandler{
+    private static class ExtensionInvocationHandler<T> implements InvocationHandler {
 
         private ReferenceConfigCache referenceConfigCache = ReferenceConfigCache.getCache();
 
@@ -67,14 +68,14 @@ public  class SPIFactoryBean<T> implements FactoryBean<T> {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String bizCode = BusinessContext.getBizCode();
-            if(StringUtils.isEmpty(bizCode)){
+            if (StringUtils.isEmpty(bizCode)) {
                 throw new SpiException("获取不到bizCode");
             }
 
             //先从本地找实现
-            T bean = ExtensionRegistry.getINSTANCE().get(spiInterface,bizCode);
-            if(Objects.nonNull(bean)){
-                return method.invoke(bean,args);
+            T bean = ExtensionRegistry.getINSTANCE().get(spiInterface, bizCode);
+            if (Objects.nonNull(bean)) {
+                return method.invoke(bean, args);
             }
 
             ReferenceConfig<T> referenceConfig = new ReferenceConfig<T>();
@@ -82,29 +83,35 @@ public  class SPIFactoryBean<T> implements FactoryBean<T> {
             referenceConfig.setConsumer(DubboConfigUtils.getConsumerConfig());
             referenceConfig.setRegistries(DubboConfigUtils.getRegestries());
             referenceConfig.setCheck(false);
-            if(Mode.GROUP.equals(mode)) {
+            if (Mode.GROUP.equals(mode)) {
                 referenceConfig.setGroup(bizCode);
             }
             referenceConfig.setTimeout(10000);//todo 配置化
             T obj = referenceConfigCache.get(referenceConfig);
 
-            if(Mode.TAG.equals(mode)){
-                RpcContext.getContext().setAttachment(CommonConstants.TAG_KEY,bizCode);
-                RpcContext.getContext().setAttachment(Constants.FORCE_USE_TAG,"true");
+            if (Mode.TAG.equals(mode)) {
+                RpcContext.getContext().setAttachment(CommonConstants.TAG_KEY, bizCode);
+                RpcContext.getContext().setAttachment(Constants.FORCE_USE_TAG, "true");
             }
 
             try {
                 return method.invoke(obj, args);
-            }catch (RpcException rpcException){
-                if(!rpcException.isNoInvokerAvailableAfterFilter()){
-                    throw rpcException;
-                }
+            } catch (InvocationTargetException invocationTargetException) {
+                //反射里抛出的异常会包一层InvocationTargetException
+                Throwable throwable = invocationTargetException.getTargetException();
+                if(throwable instanceof  RpcException){
+                    RpcException rpcException = (RpcException)throwable;
+                    if (!rpcException.isNoInvokerAvailableAfterFilter()) {
+                        throw rpcException;
+                    }
 
-                obj = ExtensionRegistry.getINSTANCE().getDefault(spiInterface);
-                if(obj == null){
-                    throw rpcException;
+                    obj = ExtensionRegistry.getINSTANCE().getDefault(spiInterface);
+                    if (obj == null) {
+                        throw rpcException;
+                    }
+                    return method.invoke(obj, args);
                 }
-                return method.invoke(obj, args);
+                throw throwable;
             }
         }
     }

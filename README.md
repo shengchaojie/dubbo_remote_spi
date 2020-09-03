@@ -48,3 +48,74 @@
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
+
+## 平台端
+1. 定义spi接口，给接口注解@SPI
+```
+@SPI(mode = Mode.TAG)
+public interface HelloService {
+
+    String hello();
+
+}
+```
+mode用于SPI路由模式
+
+如果为Mode.TAG,业务端在暴露SPI实现的时候通过tag打标
+如果为Mode.GROUP,业务端在暴露SPI实现的时候通过group打标
+
+2. 激活配置
+```
+@EnableExtensionConsumer
+@SPIRegistrar({HelloService.class})
+@Configuration
+public class Config {
+}
+```
+
+通过@EnableExtensionConsumer激活平台端SPI功能
+通过@SPIRegistrar注册SPI接口
+
+3. 使用SPI
+
+方式一(推荐)
+```
+ExtensionHelper.execute("chinese",()-> {
+    String hello = helloService.hello();
+    System.out.println(hello);
+    return hello;
+});
+```
+方式二
+```
+BusinessContext.setBizCode("chinese");
+System.out.println(helloService.hello());
+```
+
+
+## 业务端
+
+1. 激活配置
+```
+@EnableExtensionProvider
+@Configuration
+public class ProviderConfig {
+}
+```
+
+通过@EnableExtensionProvider激活远程SPI特性
+
+2. 实现远程SPI接口
+```
+@DefaultExtension
+@Extension(bizCode = "chinese")
+public class ChineseHelloService implements HelloService {
+    @Override
+    public String hello() {
+        return "你好";
+    }
+}
+```
+通过@Extension对远程SPI实现进行打标，bizCode为具体的业务身份
+
+@DefaultExtension用于标识该实现为默认实现，考虑到平台端有时候会对一些SPI接口有一些默认实现，这个注解只支持本地使用，也就是应用即是

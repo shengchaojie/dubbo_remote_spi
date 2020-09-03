@@ -10,9 +10,9 @@
 
     <dubbo:registry address="zookeeper://localhost:2181" />
 
-    <bean class="io.github.shengchaojie.drs.consumer.SPIFactoryBean" id="helloService">
-        <constructor-arg index="0" value="io.github.shengchaojie.drs.test.api.HelloService"/>
-    </bean>
+<!--    <bean class="io.github.shengchaojie.drs.consumer.SPIFactoryBean" id="helloService">-->
+<!--        <constructor-arg index="0" value="io.github.shengchaojie.drs.test.api.HelloService"/>-->
+<!--    </bean>-->
 
     <context:component-scan base-package="io.github.shengchaojie.drs.test.consumer" />
 </beans>

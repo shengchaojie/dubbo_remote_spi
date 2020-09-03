@@ -14,10 +14,10 @@ public class ConsumerMain {
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("consumer.xml");
-        HelloService helloService = applicationContext.getBean("io.github.shengchaojie.drs.test.api.HelloService",HelloService.class);
+        HelloService helloService = applicationContext.getBean("SPI."+HelloService.class.getSimpleName(),HelloService.class);
         BusinessContext.setBizCode("chinese");
         System.out.println(helloService.hello());
-        BusinessContext.setBizCode("american2");
+        BusinessContext.setBizCode("american222");
         System.out.println(helloService.hello());
 
         ExtensionHelper.execute("chinese",()-> {

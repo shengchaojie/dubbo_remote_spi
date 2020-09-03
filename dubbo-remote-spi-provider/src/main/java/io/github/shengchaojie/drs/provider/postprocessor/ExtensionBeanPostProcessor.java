@@ -43,28 +43,14 @@ public class ExtensionBeanPostProcessor implements BeanPostProcessor, Ordered {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Extension extension = AopUtils.getTargetClass(bean).getAnnotation(Extension.class);
-        List<Class<?>> spiInterfaces = null;
         if (extension != null) {
             Class<?> clazz = AopUtils.getTargetClass(bean);
             //获取Extension标注的实现类继承的spi接口
-            spiInterfaces = Arrays.stream(ClassUtils.getAllInterfacesForClass(clazz)).filter(this::isSPIInterface).collect(Collectors.toList());
+            List<Class<?>> spiInterfaces = Arrays.stream(ClassUtils.getAllInterfacesForClass(clazz)).filter(this::isSPIInterface).collect(Collectors.toList());
             if (spiInterfaces.size() == 0) {
                 throw SpiException.fail(AopUtils.getTargetClass(bean).getName() + "使用了@Extension标注,但未继承SPI接口!");
             }
             dubboServiceExporter.export(bean, extension.bizCode(), spiInterfaces);
-        }
-
-        DefaultExtension defaultExtension = AopUtils.getTargetClass(bean).getAnnotation(DefaultExtension.class);
-        if (defaultExtension == null) {
-            return bean;
-        }
-
-        if (CollectionUtils.isEmpty(spiInterfaces)) {
-            throw SpiException.fail(AopUtils.getTargetClass(bean).getName() + "使用了@DefaultExtension,但未继承SPI接口!");
-        }
-
-        for (Class<?> spiInterface : spiInterfaces) {
-            ExtensionRegistry.getINSTANCE().registryDefault(spiInterface.getName(),bean);
         }
 
         return bean;
