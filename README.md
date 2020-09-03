@@ -91,7 +91,20 @@ ExtensionHelper.execute("chinese",()-> {
 BusinessContext.setBizCode("chinese");
 System.out.println(helloService.hello());
 ```
+4. 默认实现
+针对SPI接口，平台方可提供默认实现，业务方不需要实现所有SPI
 
+```
+@DefaultExtension
+public class DefaultHelloService implements HelloService {
+    @Override
+    public String hello() {
+        return "default";
+    }
+}
+```
+
+加@DefaultExtension注解即可
 
 ## 业务端
 
@@ -117,5 +130,3 @@ public class ChineseHelloService implements HelloService {
 }
 ```
 通过@Extension对远程SPI实现进行打标，bizCode为具体的业务身份
-
-@DefaultExtension用于标识该实现为默认实现，考虑到平台端有时候会对一些SPI接口有一些默认实现，这个注解只支持本地使用，也就是应用即是
