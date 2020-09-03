@@ -91,6 +91,7 @@ ExtensionHelper.execute("chinese",()-> {
 BusinessContext.setBizCode("chinese");
 System.out.println(helloService.hello());
 ```
+
 4. 默认实现
 
 针对SPI接口，平台方可提供默认实现，业务方不需要实现所有SPI
